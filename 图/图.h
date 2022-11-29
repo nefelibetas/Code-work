@@ -1,5 +1,3 @@
-#ifndef GRAPH_H_INCLUDED
-#define GRAPH_H_INCLUDED
 #include <stdio.h>
 #include <stdlib.h>
 #define N 6
@@ -98,36 +96,43 @@ GraphList *initGraphList()
     int n;
     scanf("%d%d%d", &map->type, &map->vcount, &n);
 
-    char c[map->vcount];
-    gets(c);
-    gets(c);
-    //第一个吸收空格的
+    char c[map->vcount + 1];
+    scanf("%s", c);
     for(int i=0; i<map->vcount; i++)
     {
-        map->vexs[i].vertex =c[i];
+        map->vexs[i].vertex = c[i];
+        map->vexs[i].degree = 0;
     }
     //输入顶点数据
 
-    int j,k;
+    int j,k,m;
     int i=0;
     for(int i=0;i<map->vcount;i++)
     {
         map->vexs[i].edgelist=NULL;
-        //map->vexs[i].edgelist->weight=0;
     }
     while(i<n)
     {
-        scanf("%d%d",&j,&k);
+        if (!map->type){
+            scanf("%d%d%d",&j,&k,&m);
+        } else {
+            scanf("%d%d",&j,&k);
+        }
         EdgeList s=(EdgeList)malloc(sizeof(struct EdgeNode));
+
         s->endvex=k;
         s->nextedge=map->vexs[j].edgelist;
         map->vexs[j].edgelist=s;
+         
         if(map->type==0)
         {
-            EdgeList s=(EdgeList)malloc(sizeof(struct EdgeNode));
-            s->endvex=j;
-            s->nextedge=map->vexs[k].edgelist;
-            map->vexs[k].edgelist=s;
+            EdgeList s1=(EdgeList)malloc(sizeof(struct EdgeNode));
+            s1->endvex=j;
+            s1->nextedge=map->vexs[k].edgelist;
+            map->vexs[k].edgelist=s1;
+            s->weight = s1->weight = m;
+        } else {
+            map->vexs[k].degree ++;
         }
         i++;
     }
@@ -251,147 +256,56 @@ void DFS_list(GraphList *G)
 
 /*第五关 生成图的拓扑排序，可根据需要添加自定义函数
 */
-
+int q[N], hh, tt = -1;
 void Top_list(GraphList *G)
 {
-	for(int j=0;j<G->vcount-1;j++)
-	{
-		for(int i=0;i<G->vcount;i++)
-		{
-			if(G->vexs[i].degree == -1)
-			{
-				continue;
-			}
-			else if(G->vexs[i].degree == 0)
-			{
-				G->vexs[i].degree = -1;
-				char temp = G->vexs[i].vertex;
-				printf("%c ",temp);
-				struct EdgeNode *t = G->vexs[i].edgelist;
-				while(t!=NULL)
-				{
-					char tc = t->endvex + '0';
-					for(int k=0;k<G->vcount;k++)
-					{
-						if(G->vexs[k].degree == -1)
-						{
-							continue;
-						}
-						else if(G->vexs[k].vertex == tc)
-						{
-							G->vexs[k].degree--;
-						}
-					}
-					t = t->nextedge;
-				}
-			}
-
-		}
-	}
+	for (int i = 0; i < G->vcount; i ++) {
+        if (G->vexs[i].degree == 0) q[++ tt] = i;
+    }
+    while (hh <= tt) {
+        int t = q[hh ++];
+        printf("%c ", G->vexs[t].vertex);
+        for (EdgeList p = G->vexs[t].edgelist; p ; p = p->nextedge) {
+            int idx = p->endvex;
+            G->vexs[idx].degree --;
+            if (G->vexs[idx].degree == 0){
+                q[++ tt] = idx;
+            }
+        }
+    }
 }
-
 /*第六关 prim算法生成最小生成树*/
-struct mst{
-	int start;
-	int stop;
-	int weight;
-};
-
-struct hmst{
-	struct mst msts[N];
-	int total;
-};
-
+int st[N], dist[N], from[N];
 void Prim_list(GraphList *G)
 {
-
-	struct hmst *H = (struct hmst *)malloc(sizeof(struct hmst));//待加入的边
-	struct hmst *T = (struct hmst *)malloc(sizeof(struct hmst));//加入的边
-	T->total = 0;
-	H->total = 0;
-	int sign[N];//标记点
-	//memset(sign,1,sizeof sign);
-	for(int i=0;i<N;i++)
-	{
-		sign[i] = 1;
-	}
-	int low = 0;
-	int low_s = 0;
-	int lowp = 0;
-	struct EdgeNode *t = G->vexs[0].edgelist;
-	sign[0] = 0;
-	while(t!=NULL)
-	{
-		printf("addH 0 %d %d \n",t->weight,t->endvex);
-		H->msts[H->total].start = 0;
-		H->msts[H->total].stop = t->endvex;
-		H->msts[H->total].weight = t->weight;
-		H->total++;
-		t = t->nextedge;
-	}
-	for(int i=0;i<G->vcount-1;i++)
-	{
-		printf("1--------------------1\n");
-		low = H->msts[0].weight;
-		//确定待选边中的最小边
-		for(int j=0;j<H->total;j++)
-		{
-			if(H->msts[j].weight< low)
-			{
-				low = H->msts[j].weight;
-				low_s = j;
-			}
-		}
-		lowp = H->msts[low_s].stop;
-		printf("%d",lowp);
-		//添加到生成树
-		T->msts[T->total].start = H->msts[low_s].start;
-		T->msts[T->total].stop = H->msts[low_s].stop;
-		T->msts[T->total].weight = H->msts[low_s].weight;
-		sign[lowp] = 0;
-		printf("%d ",low_s);
-		printf("addT %d %d %d\n",T->msts[T->total].start,T->msts[T->total].stop,T->msts[T->total].weight);
-		T->total++;
-		//去除待选边中被选中的
-		for(int j=0;j<6;j++)
-		{
-			printf("%d",sign[j]);
-		}
-		printf("\n");
-		H->total--;
-		H->msts[low_s] = H->msts[H->total];
-		//去除待选边中不可能去选的（选了就成回路）
-		for(int j=0;j<H->total;j++)
-		{
-			if(sign[H->msts[j].stop]==0 && sign[H->msts[j].start] == 0)
-			{
-				H->total--;
-				H->msts[j] = H->msts[H->total];
-				j--;
-
-			}
-		}
-		//添加新的边到待选边
-		t = G->vexs[lowp].edgelist;
-		while(t!=NULL)
-		{
-			if(sign[t->endvex] != 0)
-			{
-				printf("addH %d %d %d\n",lowp,t->weight,t->endvex);
-				printf("%d",lowp);
-				H->msts[H->total].start = lowp;
-				H->msts[H->total].stop = t->endvex;
-				H->msts[H->total].weight = t->weight;
-				H->total++;
-			}
-			t = t->nextedge;
-		}
-	}
-	printf("\n");
-	for(int i=0;i<T->total;i++)
-	{
-		printf("%d %d\n",T->msts[i].start,T->msts[i].stop);
-	}
+    memset(dist, 0x3f, sizeof(dist));
+    for (int i = 0; i < G->vcount; i ++) {
+        int t = -1;
+        /* 选出最小的边 */
+        for (int j = 0; j < G->vcount; j ++)
+            if (!st[j] && (t == -1 ||  dist[t] > dist[j]))
+                t = j;
+        if (i && dist[t] == 0x3f3f3f3f){
+            puts("无法建树");
+            return;
+        }
+        if (i) {
+            printf("%d %d\n", from[t] , t);
+        }
+        st[t] = 1;
+        for (int j = 0; j < G->vcount; j ++) {
+            int tdist = 0x3f3f3f3f;
+            for (EdgeList p = G->vexs[t].edgelist; p ; p = p->nextedge)
+                if (p->endvex == j){
+                    tdist = p->weight;
+                    break;
+                }
+            if (dist[j] > tdist) {
+                dist[j] = tdist;
+                from[j] = t;
+            }
+        }
+    }
 }
 /*第七关 Kruskal算法生成最小生成树*/
 
@@ -406,4 +320,4 @@ void Dijkstra_list(GraphList *G)
 {
 
 }
-#endif // GRAPH_H_INCLUDED
+
