@@ -64,7 +64,7 @@ void printHashTable(struct hashTable *h)
 //哈希函数，h(key) = (key*3) %  7
 int hashFun(int key)
 {
-    return (key*3)%11;
+    return (key*3)%7;
 }
 
 //函数功能：计算key的哈希地址，若发生冲突，则使用线性探测再散列的方法查找合适的插入位置下标，并返回该下标
