@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #define N 6
 //邻接矩阵数据结构
 typedef struct
@@ -113,11 +115,10 @@ GraphList *initGraphList()
     }
     while(i<n)
     {
-        if (!map->type){
-            scanf("%d%d%d",&j,&k,&m);
-        } else {
-            scanf("%d%d",&j,&k);
-        }
+        
+        scanf("%d%d",&j,&k);
+        // scanf("%d%d%d",&j,&k,&m);
+        // 由于试题输入格式不统一, 需要边长的题目，要换成第二个scanf
         EdgeList s=(EdgeList)malloc(sizeof(struct EdgeNode));
 
         s->endvex=k;
