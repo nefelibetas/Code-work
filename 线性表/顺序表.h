@@ -146,20 +146,12 @@ int deletePos_seq(PseqList L,int pos)
 int delete_seq(PseqList L,int x)
 {//在顺序表L中删除与参数x值相同的数据元素，返回删除数据元素的个数
   //可以使用之前已完成的操作
-    int i,j,m,flag=0;
-    m=locate_seq(L,x);
-    for(i=m;i<L->curNum;i++)
-    {
-        if(L->element[i]==x)
-        {
-            for(j=i;j<L->curNum-1;j++)
-                L->element[j]=L->element[j+1];
-            L->curNum=L->curNum-1;
-            L->element[L->curNum]=0;
-            flag++;
-        }
-    }
-    return flag;
+  int num = 0;
+while(locate_seq(L,x)!=-1){
+	deletePos_seq(L,locate_seq(L,x));
+	num++;
+}
+return num;	
 }
 
 
@@ -179,21 +171,13 @@ void replace_seq(PseqList L,int x,int y)
 void delDuplicate_seq(PseqList L)
 {//移除线性表中的所有重复元素；不要使用额外的数组空间，必须在原地修改输入数组 并在使用 O(1) 额外空间的条件下完成
   //使用常规删除即可，已修改测试用例
-    int i,j=0;
-    for(i=0;i<L->curNum;i++)
-    {
-        if(L->element[i]!=L->element[j])
-        {
-            L->element[j++]=L->element[i];
-        }
-    }
-    int flag=j;
-    while(j<L->curNum)
-    {
-        L->element[j++]=0;
-    }
-    L->curNum=flag;
-    if(L->element[1]==12)
-        L->curNum=flag-1;
+int i,p,q;
+for(q=0;q<L->curNum;q++){
+for(p=q+1;p<L->curNum;p++){
+    if(L->element[q]==L->element[p]){
+      delete_seq(L,L->element[p]);
+  }
+}
+}
 }
 #endif // FUN_H_INCLUDED
